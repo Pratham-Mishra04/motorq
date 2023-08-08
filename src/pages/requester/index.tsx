@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Approver, Workflow } from '@/types';
-import { initialWorkflow } from '@/types/initials';
 import configuredAxios from '@/config/axios';
+import { Workflow, Approver, Request } from '@/types';
+import { initialRequest, initialWorkflow } from '@/types/initials';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-const Admin = () => {
-  const [workflow, setWorkflow] = useState<Workflow>(initialWorkflow);
-  const [approvers, setApprovers] = useState<Approver[]>([]);
-  const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
+const Requester = () => {
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [request, setRequest] = useState<Request>(initialRequest);
 
   useEffect(() => {
     configuredAxios
-      .get('/admin/get-approvers')
+      .get('/requester/get-workflows')
       .then((res) => {
-        if (res.status == 200) setApprovers(res.data.approvers || []);
-        else toast.error(res.data.message);
+        if (res.status == 200) setWorkflows(res.data.approvers || []);
+        else toast.error(res.data.workflows);
       })
       .catch((err) => {
         toast.error('Internal Server Error');
@@ -23,16 +22,16 @@ const Admin = () => {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
-    setWorkflow((prevWorkflow) => ({
-      ...prevWorkflow,
+    setRequest((prevRequest) => ({
+      ...prevRequest,
       [name]: value,
     }));
   };
 
   const handleTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = event.target;
-    setWorkflow((prevWorkflow) => ({
-      ...prevWorkflow,
+    setRequest((prevRequest) => ({
+      ...prevRequest,
       [name]: value,
     }));
   };
@@ -40,15 +39,14 @@ const Admin = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const formData = {
-      name: workflow.name,
-      description: workflow.description,
-      type: workflow.type,
-      approvers: selectedApprovers,
+      name: request.name,
+      description: request.description,
+      workflowId: request.workflowId,
     };
     try {
-      const res = await configuredAxios.post('/admin/create-workflow', formData);
+      const res = await configuredAxios.post('/requester/create-request ', formData);
       if (res.status == 201) {
-        toast.success('Workflow Added.');
+        toast.success('Request Added.');
       } else {
         toast.error(res.data.message);
       }
@@ -71,7 +69,7 @@ const Admin = () => {
               type="text"
               id="id"
               name="id"
-              value={workflow.name}
+              value={request.name}
               onChange={handleInputChange}
               className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
               required
@@ -84,7 +82,7 @@ const Admin = () => {
             <textarea
               id="description"
               name="description"
-              value={workflow.description}
+              value={request.description}
               onChange={handleTextAreaChange}
               rows={3}
               className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
@@ -92,18 +90,21 @@ const Admin = () => {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <div className="block text-sm font-medium text-gray-700">List of Approvers: </div>
-            {approvers.map((approver) => {
+            <div className="block text-sm font-medium text-gray-700">List of Workflows: </div>
+            {workflows.map((workflow) => {
               return (
                 <div
-                  key={approver.id}
-                  onClick={() => {
-                    if (selectedApprovers.includes(approver.userId)) return;
-                    setSelectedApprovers((prev) => [...prev, approver.userId]);
-                  }}
-                  className={`w-full ${selectedApprovers.includes(approver.userId) ? '' : 'hover:bg-slate-300'} rounded-xl text-center py-2`}
+                  key={workflow.id}
+                  onClick={() =>
+                    setRequest((prevRequest) => ({
+                      ...prevRequest,
+                      workflowId: workflow.id,
+                    }))
+                  }
+                  className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2"
                 >
-                  {approver.User.name}
+                  <div>{workflow.name}</div>
+                  <div>{workflow.description}</div>
                 </div>
               );
             })}
@@ -120,4 +121,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default Requester;
