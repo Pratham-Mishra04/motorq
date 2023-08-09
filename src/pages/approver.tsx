@@ -14,6 +14,8 @@ const Acceptor = () => {
   const [selectedTitle, setSelectedTitle] = useState('');
   const [selectedId, setSelectedId] = useState('');
 
+  const [mutex, setMutex] = useState(false);
+
   useEffect(() => {
     getHandler('/approver/get-requests')
       .then((res) => {
@@ -26,6 +28,8 @@ const Acceptor = () => {
   }, []);
 
   const handleAccept = async () => {
+    if (mutex) return;
+    setMutex(true);
     const formData = {
       requestId: selectedId,
       comment,
@@ -41,13 +45,17 @@ const Acceptor = () => {
       setSelected(false);
       setComment('');
       toast.success('Request Approved');
+      setMutex(false);
     } else {
       toast.error(res.data.message);
       console.log(res);
+      setMutex(false);
     }
   };
 
   const handleReject = async () => {
+    if (mutex) return;
+    setMutex(true);
     const formData = {
       requestId: selectedId,
       comment,
@@ -63,25 +71,36 @@ const Acceptor = () => {
       setSelected(false);
       setComment('');
       toast.success('Request Rejected');
+      setMutex(false);
     } else {
       toast.error(res.data.message);
       console.log(res);
+      setMutex(false);
     }
   };
 
   const handleJustify = async () => {
+    if (mutex) return;
+    setMutex(true);
     const formData = {
       requestId: selectedId,
       comment,
     };
     const res = await postHandler('/approver/justify-request', formData);
     if (res.statusCode == 201) {
+      setRequests(
+        requests.filter((request) => {
+          return request.id != selectedId;
+        })
+      );
       setSelected(false);
       setComment('');
       toast.success('Asked for justification');
+      setMutex(false);
     } else {
       toast.error(res.data.message);
       console.log(res);
+      setMutex(false);
     }
   };
 
@@ -105,7 +124,7 @@ const Acceptor = () => {
           />
 
           <div
-            className="w-full text-center m-auto bg-slate-50 border-2 text-black border-[#1f1f1f] hover:text-white py-2 rounded-xl font-Inconsolata text-xl hover:bg-[#1f1f1f] transition-all duration-200 ease-in-out"
+            className="w-full cursor-pointer text-center m-auto bg-slate-50 border-2 text-black border-[#1f1f1f] hover:text-white py-2 rounded-xl font-Inconsolata text-xl hover:bg-[#1f1f1f] transition-all duration-200 ease-in-out"
             onClick={selectedFunc}
           >
             Confirm

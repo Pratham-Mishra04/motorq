@@ -53,6 +53,7 @@ const NewWorkflow = () => {
       toast.success('Workflow Added.');
       //   setWorkflows((prev) => [...prev, workflow]);
       setWorkflow(initialWorkflow);
+      setSelectedApprovers([]);
     } else {
       toast.error(res.data.message);
     }
