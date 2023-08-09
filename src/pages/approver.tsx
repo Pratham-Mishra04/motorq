@@ -27,15 +27,11 @@ const Acceptor = () => {
       });
   }, []);
 
-  const handleAccept = async () => {
-    if (selectedId == '') {
-      setSelected(false);
-      return;
-    }
+  const handleAccept = async (requestId: string) => {
     if (mutex) return;
     setMutex(true);
     const formData = {
-      requestId: selectedId,
+      requestId,
       comment,
     };
 
@@ -57,15 +53,11 @@ const Acceptor = () => {
     }
   };
 
-  const handleReject = async () => {
-    if (selectedId == '') {
-      setSelected(false);
-      return;
-    }
+  const handleReject = async (requestId: string) => {
     if (mutex) return;
     setMutex(true);
     const formData = {
-      requestId: selectedId,
+      requestId,
       comment,
     };
 
@@ -87,15 +79,11 @@ const Acceptor = () => {
     }
   };
 
-  const handleJustify = async () => {
-    if (selectedId == '') {
-      setSelected(false);
-      return;
-    }
+  const handleJustify = async (requestId: string) => {
     if (mutex) return;
     setMutex(true);
     const formData = {
-      requestId: selectedId,
+      requestId,
       comment,
     };
     const res = await postHandler('/approver/justify-request', formData);
@@ -165,10 +153,11 @@ const Acceptor = () => {
               <div className="w-full flex justify-around">
                 <div
                   onClick={() => {
-                    setSelectedFunc(() => handleAccept);
-                    setSelectedId(request.id);
-                    setSelectedTitle('Accept this Request?');
-                    setSelected(true);
+                    // setSelectedFunc(() => handleAccept);
+                    // setSelectedId(request.id);
+                    // setSelectedTitle('Accept this Request?');
+                    // setSelected(true);
+                    handleAccept(request.id);
                   }}
                   className="cursor-pointer p-2 rounded-lg transition-all duration-150 ease-in-out hover:text-black hover:bg-[#65ff87]"
                 >
@@ -176,10 +165,11 @@ const Acceptor = () => {
                 </div>
                 <div
                   onClick={() => {
-                    setSelectedFunc(() => handleReject);
-                    setSelectedId(request.id);
-                    setSelectedTitle('Reject this Request?');
-                    setSelected(true);
+                    // setSelectedFunc(() => handleReject);
+                    // setSelectedId(request.id);
+                    // setSelectedTitle('Reject this Request?');
+                    // setSelected(true);
+                    handleReject(request.id);
                   }}
                   className="cursor-pointer p-2 rounded-lg transition-all duration-150 ease-in-out hover:text-black hover:bg-[#ff7676]"
                 >
@@ -187,10 +177,11 @@ const Acceptor = () => {
                 </div>
                 <div
                   onClick={() => {
-                    setSelectedFunc(() => handleJustify);
-                    setSelectedId(request.id);
-                    setSelectedTitle('Ask for Justification?');
-                    setSelected(true);
+                    // setSelectedFunc(() => handleJustify);
+                    // setSelectedId(request.id);
+                    // setSelectedTitle('Ask for Justification?');
+                    // setSelected(true);
+                    handleJustify(request.id);
                   }}
                   className="cursor-pointer p-2 rounded-lg transition-all duration-150 ease-in-out hover:text-black hover:bg-[#f2ff92]"
                 >
