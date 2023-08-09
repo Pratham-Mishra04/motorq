@@ -1,5 +1,6 @@
 import configuredAxios from '@/config/axios';
 import postHandler from '@/handlers/postHandler';
+import { Role } from '@/types';
 import { AxiosError } from 'axios';
 import { setCookies } from 'cookies-next';
 import { useRouter } from 'next/router';
@@ -23,7 +24,11 @@ export default function ExampleV3(): JSX.Element {
       toast.success('Logged In');
       setCookies('token', res.data.token);
       setCookies('role', res.data.role);
-      router.push('/');
+      var pushURL = '/';
+      if (res.data.role == Role.ADMIN) pushURL = '/admin';
+      else if (res.data.role == Role.APPROVER) pushURL = '/approver';
+      else if (res.data.role == Role.REQUESTER) pushURL = '/requester';
+      router.push(pushURL);
     } else {
       toast.error(res.data.message);
     }

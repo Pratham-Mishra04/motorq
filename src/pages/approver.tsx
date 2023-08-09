@@ -1,6 +1,8 @@
+import { BACKEND_URL } from '@/config/routes';
 import getHandler from '@/handlers/getHandler';
 import postHandler from '@/handlers/postHandler';
 import { Request } from '@/types';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -121,7 +123,14 @@ const Acceptor = () => {
               className="w-full flex flex-col gap-2 border-2 transition-all duration-200 ease-in-out hover:bg-[#1f1f1f] hover:text-white rounded-xl px-4 py-2"
             >
               <div className="text-xl">Name: {request.name}</div>
-              <div className="border-b-2 pb-2">{request.description}</div>
+              <div className="border-b-2 pb-2">Description: {request.description}</div>
+              {request.attachmentPath ? (
+                <Link target="_blank" href={`${BACKEND_URL}/files/${request.attachmentPath}`} className="text-sm">
+                  View Attachment
+                </Link>
+              ) : (
+                <></>
+              )}
               <div className="w-full flex justify-around">
                 <div
                   onClick={() => {

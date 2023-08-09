@@ -36,4 +36,5 @@ export const initialRequest: Request = {
   comments: '',
   createdAt: new Date(),
   updatedAt: new Date(),
+  attachmentPath: null,
 };

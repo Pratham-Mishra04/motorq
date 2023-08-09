@@ -54,4 +54,5 @@ export interface Request {
   comments: string;
   createdAt: Date;
   updatedAt: Date;
+  attachmentPath: string | null;
 }

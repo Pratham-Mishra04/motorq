@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 const NewRequest = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [request, setRequest] = useState<Request>(initialRequest);
+  const [attachment, setAttachment] = useState<File>();
 
   useEffect(() => {
     getHandler('/requester/get-workflows')
@@ -38,16 +39,34 @@ const NewRequest = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const formData = {
-      name: request.name,
-      description: request.description,
-      workflowId: request.workflowId,
-    };
+    let formData = {};
+    const attachmentFormData = new FormData();
+    if (attachment) {
+      attachmentFormData.append('file', attachment);
+      const attachmentRes = await postHandler('/requester/upload', attachmentFormData, 'multipart/form-data');
+      if (attachmentRes.statusCode == 201)
+        formData = {
+          name: request.name,
+          description: request.description,
+          workflowId: request.workflowId,
+          filename: attachmentRes.data.filename,
+        };
+      else {
+        toast.error(attachmentRes.data.message);
+      }
+    } else
+      formData = {
+        name: request.name,
+        description: request.description,
+        workflowId: request.workflowId,
+      };
 
-    const res = await postHandler('/requester/create-request ', formData);
+    const res = await postHandler('/requester/create-request', formData);
+    console.log(formData);
     if (res.statusCode == 201) {
       // setPendingRequests((prev) => [...prev, request]);
       setRequest(initialRequest);
+      setAttachment(undefined);
       toast.success('Request Added.');
     } else {
       toast.error(res.data.message);
@@ -83,6 +102,24 @@ const NewRequest = () => {
             rows={3}
             className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
             required
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="id" className="block text-sm font-medium text-gray-700">
+            Attachment
+          </label>
+          <input
+            type="file"
+            id="attachment"
+            multiple={false}
+            onChange={({ target }) => {
+              if (target.files && target.files[0]) {
+                const file = target.files[0];
+                if (file.type.split('/')[1] == 'pdf') {
+                  setAttachment(file);
+                } else toast.error('Only PDF Files allowed');
+              }
+            }}
           />
         </div>
         <div className="flex flex-col gap-2">
