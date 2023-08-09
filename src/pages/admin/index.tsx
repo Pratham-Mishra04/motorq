@@ -1,22 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Approver, Workflow } from '@/types';
 import { initialWorkflow } from '@/types/initials';
-import configuredAxios from '@/config/axios';
 import { toast } from 'react-toastify';
 import getHandler from '@/handlers/getHandler';
 import postHandler from '@/handlers/postHandler';
+import WorkflowComponent from '@/components/workflow';
 
 const Admin = () => {
   const [workflow, setWorkflow] = useState<Workflow>(initialWorkflow);
   const [approvers, setApprovers] = useState<Approver[]>([]);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
+
+  const [showWorkflow, setShowWorkflow] = useState(false);
+  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow>(initialWorkflow);
 
   useEffect(() => {
     getHandler('/admin/get-approvers')
       .then((res) => {
         if (res.statusCode == 200) {
           setApprovers(res.data || []);
-          console.log(res.data);
+        } else toast.error(res.data.message);
+      })
+      .catch((err) => {
+        toast.error('Internal Server Error');
+      });
+
+    getHandler('/admin/get-workflows')
+      .then((res) => {
+        if (res.statusCode == 200) {
+          setWorkflows(res.data || []);
         } else toast.error(res.data.message);
       })
       .catch((err) => {
@@ -52,6 +65,7 @@ const Admin = () => {
     const res = await postHandler('/admin/create-workflow', formData);
     if (res.statusCode == 201) {
       toast.success('Workflow Added.');
+      setWorkflows((prev) => [...prev, workflow]);
       setWorkflow(initialWorkflow);
     } else {
       toast.error(res.data.message);
@@ -117,6 +131,12 @@ const Admin = () => {
             Submit
           </button>
         </form>
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="block text-sm font-medium text-gray-700">List of Workflows: </div>
+        {workflows.map((workflow) => {
+          return <WorkflowComponent key={workflow.id} workflow={workflow} />;
+        })}
       </div>
     </div>
   );
