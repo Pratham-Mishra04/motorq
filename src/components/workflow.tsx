@@ -64,11 +64,9 @@ const WorkflowComponent = ({ workflow }: Props) => {
   }, []);
 
   return (
-    <div className="flex flex-col bg-white">
-      <div className="w-full flex justify-between">
-        <div>{workflow.name}</div>
-      </div>
-      <div className="flex flex-col">
+    <div className="flex flex-col gap-4 bg-slate-300 rounded-lg px-2 py-4">
+      <div className="text-2xl">Name: {workflow.name}</div>
+      <div className="flex flex-col py-2 border-black border-y-[1px]">
         <div>Description:</div>
         <div>{workflow.description}</div>
       </div>
