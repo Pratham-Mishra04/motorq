@@ -1,14 +1,12 @@
+import NewRequest from '@/components/requester/new_request';
+import RequestComponent from '@/components/requester/request';
 import getHandler from '@/handlers/getHandler';
 import postHandler from '@/handlers/postHandler';
-import { Workflow, Request } from '@/types';
-import { initialRequest } from '@/types/initials';
+import { Request } from '@/types';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const Requester = () => {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [request, setRequest] = useState<Request>(initialRequest);
-
   const [pendingRequests, setPendingRequests] = useState<Request[]>([]);
   const [acceptedRequests, setAcceptedRequests] = useState<Request[]>([]);
   const [rejectedRequests, setRejectedRequests] = useState<Request[]>([]);
@@ -17,17 +15,6 @@ const Requester = () => {
   const [addJustification, setAddJustification] = useState(false);
   const [justification, setJustification] = useState('');
   const [justificationRequestID, setJustificationRequestID] = useState('');
-
-  useEffect(() => {
-    getHandler('/requester/get-workflows')
-      .then((res) => {
-        if (res.statusCode == 200) setWorkflows(res.data || []);
-        else toast.error(res.data.message);
-      })
-      .catch((err) => {
-        toast.error('Internal Server Error');
-      });
-  }, []);
 
   useEffect(() => {
     getHandler('/requester/get-approved')
@@ -67,40 +54,6 @@ const Requester = () => {
       });
   }, []);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    setRequest((prevRequest) => ({
-      ...prevRequest,
-      [name]: value,
-    }));
-  };
-
-  const handleTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
-    setRequest((prevRequest) => ({
-      ...prevRequest,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const formData = {
-      name: request.name,
-      description: request.description,
-      workflowId: request.workflowId,
-    };
-
-    const res = await postHandler('/requester/create-request ', formData);
-    if (res.statusCode == 201) {
-      setPendingRequests((prev) => [...prev, request]);
-      setRequest(initialRequest);
-      toast.success('Request Added.');
-    } else {
-      toast.error(res.data.message);
-    }
-  };
-
   const handleJustification = async () => {
     const formData = {
       requestId: justificationRequestID,
@@ -116,11 +69,11 @@ const Requester = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8">
+    <div className="w-1/2 pb-8 max-md:w-full flex flex-col gap-12 mx-auto pt-8 px-12 border-x-2 bg-slate-50">
       {addJustification ? (
-        <div className="bg-white border-2">
+        <div className="w-1/4 max-md:w-[90vw] bg-white flex flex-col gap-4 py-6 px-4 rounded-xl border-2 fixed top-32 right-1/2 translate-x-1/2 z-50">
           <div className="w-full flex justify-between">
-            <div>Add Justification</div>
+            <div className="text-xl">Add Justification</div>
             <div onClick={() => setAddJustification(false)} className="cursor-pointer">
               X
             </div>
@@ -134,128 +87,56 @@ const Requester = () => {
             onChange={(el) => setJustification(el.target.value)}
           />
 
-          <div onClick={handleJustification}>Confirm?</div>
+          <div
+            className="w-full text-center m-auto bg-slate-50 border-2 text-black border-[#1f1f1f] hover:text-white py-2 rounded-xl font-Inconsolata text-xl hover:bg-[#1f1f1f] transition-all duration-200 ease-in-out"
+            onClick={handleJustification}
+          >
+            Confirm
+          </div>
         </div>
       ) : (
         <></>
       )}
-      <div className="flex flex-col gap-6">
-        <div className="text-2xl">Add New WorkFlow</div>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="id" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={request.name}
-              onChange={handleInputChange}
-              className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={request.description}
-              onChange={handleTextAreaChange}
-              rows={3}
-              className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="block text-sm font-medium text-gray-700">List of Workflows: </div>
-            {workflows.map((workflow) => {
-              return (
-                <div
-                  key={workflow.id}
-                  onClick={() =>
-                    setRequest((prevRequest) => ({
-                      ...prevRequest,
-                      workflowId: workflow.id,
-                    }))
-                  }
-                  className={`w-full cursor-pointer ${
-                    request.workflowId == workflow.id ? 'bg-slate-300' : ''
-                  } flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2`}
-                >
-                  <div className="text-xl">{workflow.name}</div>
-                  <div>{workflow.description}</div>
-                </div>
-              );
-            })}
-          </div>
-          <button
-            type="submit"
-            className="w-full m-auto bg-slate-100 border-2 text-black border-[#1f1f1f] hover:text-white py-2 rounded-xl font-Inconsolata text-xl hover:bg-[#1f1f1f] transition-all duration-200 ease-in-out"
-          >
-            Submit
-          </button>
-        </form>
-
-        <div className="flex flex-col gap-2">
-          <div className="block text-sm font-medium text-gray-700">List of Approved Requests: </div>
-          {acceptedRequests.map((request) => {
-            return (
-              <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
-                <div>{request.name}</div>
-                <div>{request.description}</div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="block text-sm font-medium text-gray-700">List of Rejected Requests: </div>
-        {rejectedRequests.map((request) => {
-          return (
-            <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
-              <div>{request.name}</div>
-              <div>{request.description}</div>
-            </div>
-          );
+      <NewRequest />
+      <div className="flex flex-col gap-2">
+        <div className="block text-sm font-medium text-gray-700">List of Approved Requests: </div>
+        {acceptedRequests.map((request) => {
+          return <RequestComponent key={request.id} request={request} />;
         })}
       </div>
 
-      <div>
-        <div className="block text-sm font-medium text-gray-700">List of Pending Requests: </div>
-        <div>
-          {pendingRequests.map((request) => {
-            return (
-              <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
-                <div>{request.name}</div>
-                <div>{request.description}</div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="flex flex-col gap-2">
+        <div className="block text-sm font-medium text-gray-700">List of Rejected Requests: </div>
+        {rejectedRequests.map((request) => {
+          return <RequestComponent key={request.id} request={request} />;
+        })}
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
+        <div className="block text-sm font-medium text-gray-700">List of Pending Requests: </div>
+        {pendingRequests.map((request) => {
+          return <RequestComponent key={request.id} request={request} />;
+        })}
+      </div>
+
+      <div className="flex flex-col gap-2">
         <div className="block text-sm font-medium text-gray-700">List of Justified Requests: </div>
-        <div>
-          {justifiedRequests.map((request) => {
-            return (
-              <div
-                key={request.id}
-                onClick={() => {
-                  setJustificationRequestID(request.id);
-                  setAddJustification(true);
-                }}
-                className="w-full cursor-pointer flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2"
-              >
-                <div>{request.name}</div>
-                <div>{request.description}</div>
-              </div>
-            );
-          })}
-        </div>
+
+        {justifiedRequests.map((request) => {
+          return (
+            <div
+              key={request.id}
+              onClick={() => {
+                setJustificationRequestID(request.id);
+                setAddJustification(true);
+              }}
+              className="w-full cursor-pointer border-2 flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2"
+            >
+              <div className="text-xl border-b-[1px] pb-2">Name: {request.name}</div>
+              <div>Description: {request.description}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

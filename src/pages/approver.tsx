@@ -41,6 +41,7 @@ const Acceptor = () => {
       toast.success('Request Approved');
     } else {
       toast.error(res.data.message);
+      console.log(res);
     }
   };
 
@@ -62,6 +63,7 @@ const Acceptor = () => {
       toast.success('Request Rejected');
     } else {
       toast.error(res.data.message);
+      console.log(res);
     }
   };
 
@@ -77,13 +79,14 @@ const Acceptor = () => {
       toast.success('Asked for justification');
     } else {
       toast.error(res.data.message);
+      console.log(res);
     }
   };
 
   return (
     <div className="w-1/2 max-md:w-full mx-auto">
       {selected ? (
-        <div className="w-1/4 bg-white flex flex-col gap-4 py-6 px-4 rounded-xl border-2 absolute top-32 right-1/2 translate-x-1/2 z-50">
+        <div className="w-1/4 max-md:w-[90vw] bg-white flex flex-col gap-4 py-6 px-4 rounded-xl border-2 fixed top-32 right-1/2 translate-x-1/2 z-50">
           <div className="w-full flex justify-between">
             <div className="text-xl">{selectedTitle}</div>
             <div onClick={() => setSelected(false)} className="cursor-pointer">
@@ -100,7 +103,7 @@ const Acceptor = () => {
           />
 
           <div
-            className="w-full text-center m-auto bg-slate-100 border-2 text-black border-[#1f1f1f] hover:text-white py-2 rounded-xl font-Inconsolata text-xl hover:bg-[#1f1f1f] transition-all duration-200 ease-in-out"
+            className="w-full text-center m-auto bg-slate-50 border-2 text-black border-[#1f1f1f] hover:text-white py-2 rounded-xl font-Inconsolata text-xl hover:bg-[#1f1f1f] transition-all duration-200 ease-in-out"
             onClick={selectedFunc}
           >
             Confirm
@@ -109,7 +112,7 @@ const Acceptor = () => {
       ) : (
         <></>
       )}
-      <div className="w-full min-h-screen pt-8 flex flex-col gap-2 border-x-2 bg-slate-100 px-4 ">
+      <div className="w-full min-h-screen pt-8 flex flex-col gap-2 border-x-2 bg-slate-50 px-4 ">
         <div className="block text-sm font-medium text-gray-700">List of Pending Requests: </div>
         {requests.map((request) => {
           return (

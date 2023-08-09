@@ -1,22 +1,19 @@
 import getHandler from '@/handlers/getHandler';
 import postHandler from '@/handlers/postHandler';
-import { Workflow, Approver } from '@/types';
-import { initialWorkflow } from '@/types/initials';
+import { Request, Workflow } from '@/types';
+import { initialRequest } from '@/types/initials';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-const NewWorkflow = () => {
-  const [workflow, setWorkflow] = useState<Workflow>(initialWorkflow);
-  const [approvers, setApprovers] = useState<Approver[]>([]);
-
-  const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
+const NewRequest = () => {
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [request, setRequest] = useState<Request>(initialRequest);
 
   useEffect(() => {
-    getHandler('/admin/get-approvers')
+    getHandler('/requester/get-workflows')
       .then((res) => {
-        if (res.statusCode == 200) {
-          setApprovers(res.data || []);
-        } else toast.error(res.data.message);
+        if (res.statusCode == 200) setWorkflows(res.data || []);
+        else toast.error(res.data.message);
       })
       .catch((err) => {
         toast.error('Internal Server Error');
@@ -25,16 +22,16 @@ const NewWorkflow = () => {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
-    setWorkflow((prevWorkflow) => ({
-      ...prevWorkflow,
+    setRequest((prevRequest) => ({
+      ...prevRequest,
       [name]: value,
     }));
   };
 
   const handleTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = event.target;
-    setWorkflow((prevWorkflow) => ({
-      ...prevWorkflow,
+    setRequest((prevRequest) => ({
+      ...prevRequest,
       [name]: value,
     }));
   };
@@ -42,25 +39,23 @@ const NewWorkflow = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const formData = {
-      name: workflow.name,
-      description: workflow.description,
-      type: workflow.type,
-      approvers: selectedApprovers,
+      name: request.name,
+      description: request.description,
+      workflowId: request.workflowId,
     };
 
-    const res = await postHandler('/admin/create-workflow', formData);
+    const res = await postHandler('/requester/create-request ', formData);
     if (res.statusCode == 201) {
-      toast.success('Workflow Added.');
-      //   setWorkflows((prev) => [...prev, workflow]);
-      setWorkflow(initialWorkflow);
+      // setPendingRequests((prev) => [...prev, request]);
+      setRequest(initialRequest);
+      toast.success('Request Added.');
     } else {
       toast.error(res.data.message);
     }
   };
-
   return (
-    <div className="w-full flex flex-col gap-4">
-      <div className="text-2xl cursor-pointer">Add New WorkFlow</div>
+    <div className="flex flex-col gap-6">
+      <div className="text-2xl">Add New Request</div>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="id" className="block text-sm font-medium text-gray-700">
@@ -70,7 +65,7 @@ const NewWorkflow = () => {
             type="text"
             id="name"
             name="name"
-            value={workflow.name}
+            value={request.name}
             onChange={handleInputChange}
             className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
             required
@@ -83,7 +78,7 @@ const NewWorkflow = () => {
           <textarea
             id="description"
             name="description"
-            value={workflow.description}
+            value={request.description}
             onChange={handleTextAreaChange}
             rows={3}
             className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
@@ -91,23 +86,23 @@ const NewWorkflow = () => {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <div className="block text-sm font-medium text-gray-700">Select Approvers: </div>
-          {approvers.map((approver) => {
+          <div className="block text-sm font-medium text-gray-700">List of Workflows: </div>
+          {workflows.map((workflow) => {
             return (
               <div
-                key={approver.id}
-                onClick={() => {
-                  if (selectedApprovers.includes(approver.id)) {
-                    setSelectedApprovers(selectedApprovers.filter((selectedApprover) => selectedApprover != approver.id));
-                    return;
-                  }
-                  setSelectedApprovers((prev) => [...prev, approver.id]);
-                }}
-                className={`w-full transition-all duration-200 ease-in-out ${
-                  selectedApprovers.includes(approver.id) ? 'bg-[#1f1f1f] text-white' : 'hover:bg-[#1f1f1f] hover:text-white'
-                } text-xl cursor-pointer rounded-xl text-center py-2`}
+                key={workflow.id}
+                onClick={() =>
+                  setRequest((prevRequest) => ({
+                    ...prevRequest,
+                    workflowId: workflow.id,
+                  }))
+                }
+                className={`w-full border-2 cursor-pointer transition-all duration-200 ease-in-out ${
+                  request.workflowId == workflow.id ? 'bg-[#1f1f1f] text-white' : 'hover:bg-[#1f1f1f] hover:text-white'
+                } flex flex-col gap-1 rounded-xl text-center py-2`}
               >
-                {approver.User.name}
+                <div className="text-2xl border-b-[1px] pb-2">{workflow.name}</div>
+                <div>{workflow.description}</div>
               </div>
             );
           })}
@@ -123,4 +118,4 @@ const NewWorkflow = () => {
   );
 };
 
-export default NewWorkflow;
+export default NewRequest;
