@@ -9,7 +9,10 @@ const Requester = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [request, setRequest] = useState<Request>(initialRequest);
 
-  const [userRequests, setUserRequests] = useState<Request[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<Request[]>([]);
+  const [acceptedRequests, setAcceptedRequests] = useState<Request[]>([]);
+  const [rejectedRequests, setRejectedRequests] = useState<Request[]>([]);
+  const [justifiedRequests, setJustifiedRequests] = useState<Request[]>([]);
 
   useEffect(() => {
     getHandler('/requester/get-workflows')
@@ -22,17 +25,43 @@ const Requester = () => {
       });
   }, []);
 
-  // useEffect(() => {
-  //   configuredAxios
-  //     .get('/requester/get-requests')
-  //     .then((res) => {
-  //       if (res.status == 200) setUserRequests(res.data.requests || []);
-  //       else toast.error(res.data.message);
-  //     })
-  //     .catch((err) => {
-  //       toast.error('Internal Server Error');
-  //     });
-  // }, []);
+  useEffect(() => {
+    getHandler('/requester/get-approved')
+      .then((res) => {
+        if (res.statusCode == 200) setAcceptedRequests(res.data || []);
+        else toast.error(res.data.message);
+      })
+      .catch((err) => {
+        toast.error('Internal Server Error');
+      });
+
+    getHandler('/requester/get-justified')
+      .then((res) => {
+        if (res.statusCode == 200) setJustifiedRequests(res.data || []);
+        else toast.error(res.data.message);
+      })
+      .catch((err) => {
+        toast.error('Internal Server Error');
+      });
+
+    getHandler('/requester/get-pending')
+      .then((res) => {
+        if (res.statusCode == 200) setPendingRequests(res.data || []);
+        else toast.error(res.data.message);
+      })
+      .catch((err) => {
+        toast.error('Internal Server Error');
+      });
+
+    getHandler('/requester/get-rejected')
+      .then((res) => {
+        if (res.statusCode == 200) setRejectedRequests(res.data || []);
+        else toast.error(res.data.message);
+      })
+      .catch((err) => {
+        toast.error('Internal Server Error');
+      });
+  }, []);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -60,6 +89,8 @@ const Requester = () => {
 
     const res = await postHandler('/requester/create-request ', formData);
     if (res.statusCode == 201) {
+      setPendingRequests((prev) => [...prev, request]);
+      setRequest(initialRequest);
       toast.success('Request Added.');
     } else {
       toast.error(res.data.message);
@@ -128,9 +159,48 @@ const Requester = () => {
             Submit
           </button>
         </form>
+
         <div className="flex flex-col gap-2">
-          <div className="block text-sm font-medium text-gray-700">List of Requests: </div>
-          {userRequests.map((request) => {
+          <div className="block text-sm font-medium text-gray-700">List of Approved Requests: </div>
+          {acceptedRequests.map((request) => {
+            return (
+              <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
+                <div>{request.name}</div>
+                <div>{request.description}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="block text-sm font-medium text-gray-700">List of Rejected Requests: </div>
+        {rejectedRequests.map((request) => {
+          return (
+            <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
+              <div>{request.name}</div>
+              <div>{request.description}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div>
+        <div className="block text-sm font-medium text-gray-700">List of Pending Requests: </div>
+        <div>
+          {pendingRequests.map((request) => {
+            return (
+              <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
+                <div>{request.name}</div>
+                <div>{request.description}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <div className="block text-sm font-medium text-gray-700">List of Justified Requests: </div>
+        <div>
+          {justifiedRequests.map((request) => {
             return (
               <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
                 <div>{request.name}</div>
