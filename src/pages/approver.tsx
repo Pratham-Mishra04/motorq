@@ -28,6 +28,10 @@ const Acceptor = () => {
   }, []);
 
   const handleAccept = async () => {
+    if (selectedId == '') {
+      setSelected(false);
+      return;
+    }
     if (mutex) return;
     setMutex(true);
     const formData = {
@@ -54,6 +58,10 @@ const Acceptor = () => {
   };
 
   const handleReject = async () => {
+    if (selectedId == '') {
+      setSelected(false);
+      return;
+    }
     if (mutex) return;
     setMutex(true);
     const formData = {
@@ -80,6 +88,10 @@ const Acceptor = () => {
   };
 
   const handleJustify = async () => {
+    if (selectedId == '') {
+      setSelected(false);
+      return;
+    }
     if (mutex) return;
     setMutex(true);
     const formData = {
