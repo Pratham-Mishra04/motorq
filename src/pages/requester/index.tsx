@@ -14,6 +14,10 @@ const Requester = () => {
   const [rejectedRequests, setRejectedRequests] = useState<Request[]>([]);
   const [justifiedRequests, setJustifiedRequests] = useState<Request[]>([]);
 
+  const [addJustification, setAddJustification] = useState(false);
+  const [justification, setJustification] = useState('');
+  const [justificationRequestID, setJustificationRequestID] = useState('');
+
   useEffect(() => {
     getHandler('/requester/get-workflows')
       .then((res) => {
@@ -97,8 +101,44 @@ const Requester = () => {
     }
   };
 
+  const handleJustification = async () => {
+    const formData = {
+      requestId: justificationRequestID,
+      description: justification,
+    };
+    const res = await postHandler('/requester/add-justification', formData);
+    if (res.statusCode == 201) {
+      setAddJustification(false);
+      toast.success('Justification Added');
+    } else {
+      toast.error(res.data.message);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto mt-8">
+      {addJustification ? (
+        <div className="bg-white border-2">
+          <div className="w-full flex justify-between">
+            <div>Add Justification</div>
+            <div onClick={() => setAddJustification(false)} className="cursor-pointer">
+              X
+            </div>
+          </div>
+
+          <input
+            className="bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
+            type="text"
+            placeholder="Add Justification"
+            value={justification}
+            onChange={(el) => setJustification(el.target.value)}
+          />
+
+          <div onClick={handleJustification}>Confirm?</div>
+        </div>
+      ) : (
+        <></>
+      )}
       <div className="flex flex-col gap-6">
         <div className="text-2xl">Add New WorkFlow</div>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -202,7 +242,14 @@ const Requester = () => {
         <div>
           {justifiedRequests.map((request) => {
             return (
-              <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
+              <div
+                key={request.id}
+                onClick={() => {
+                  setJustificationRequestID(request.id);
+                  setAddJustification(true);
+                }}
+                className="w-full cursor-pointer flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2"
+              >
                 <div>{request.name}</div>
                 <div>{request.description}</div>
               </div>

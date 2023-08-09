@@ -70,7 +70,6 @@ const Acceptor = () => {
       requestId: selectedId,
       comment,
     };
-
     const res = await postHandler('/approver/justify-request', formData);
     if (res.statusCode == 201) {
       setSelected(false);
