@@ -81,11 +81,11 @@ const Acceptor = () => {
   };
 
   return (
-    <div className="w-1/3 m-auto">
+    <div className="w-1/2 max-md:w-full mx-auto">
       {selected ? (
-        <div className="bg-white border-2">
+        <div className="w-1/4 bg-white flex flex-col gap-4 py-6 px-4 rounded-xl border-2 absolute top-32 right-1/2 translate-x-1/2 z-50">
           <div className="w-full flex justify-between">
-            <div>{selectedTitle}</div>
+            <div className="text-xl">{selectedTitle}</div>
             <div onClick={() => setSelected(false)} className="cursor-pointer">
               X
             </div>
@@ -99,18 +99,26 @@ const Acceptor = () => {
             onChange={(el) => setComment(el.target.value)}
           />
 
-          <div onClick={selectedFunc}>Confirm?</div>
+          <div
+            className="w-full text-center m-auto bg-slate-100 border-2 text-black border-[#1f1f1f] hover:text-white py-2 rounded-xl font-Inconsolata text-xl hover:bg-[#1f1f1f] transition-all duration-200 ease-in-out"
+            onClick={selectedFunc}
+          >
+            Confirm
+          </div>
         </div>
       ) : (
         <></>
       )}
-      <div className="flex flex-col gap-2">
-        <div className="block text-sm font-medium text-gray-700">List of Requests: </div>
+      <div className="w-full min-h-screen pt-8 flex flex-col gap-2 border-x-2 bg-slate-100 px-4 ">
+        <div className="block text-sm font-medium text-gray-700">List of Pending Requests: </div>
         {requests.map((request) => {
           return (
-            <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
-              <div>{request.name}</div>
-              <div>{request.description}</div>
+            <div
+              key={request.id}
+              className="w-full flex flex-col gap-2 border-2 transition-all duration-200 ease-in-out hover:bg-[#1f1f1f] hover:text-white rounded-xl px-4 py-2"
+            >
+              <div className="text-xl">Name: {request.name}</div>
+              <div className="border-b-2 pb-2">{request.description}</div>
               <div className="w-full flex justify-around">
                 <div
                   onClick={() => {
@@ -119,7 +127,7 @@ const Acceptor = () => {
                     setSelectedTitle('Accept this Request?');
                     setSelected(true);
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer p-2 rounded-lg transition-all duration-150 ease-in-out hover:text-black hover:bg-[#65ff87]"
                 >
                   Approve
                 </div>
@@ -130,7 +138,7 @@ const Acceptor = () => {
                     setSelectedTitle('Reject this Request?');
                     setSelected(true);
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer p-2 rounded-lg transition-all duration-150 ease-in-out hover:text-black hover:bg-[#ff7676]"
                 >
                   Reject
                 </div>
@@ -141,7 +149,7 @@ const Acceptor = () => {
                     setSelectedTitle('Ask for Justification?');
                     setSelected(true);
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer p-2 rounded-lg transition-all duration-150 ease-in-out hover:text-black hover:bg-[#f2ff92]"
                 >
                   Ask for Justification
                 </div>

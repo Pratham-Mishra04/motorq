@@ -1,7 +1,7 @@
 import React from 'react';
-import History from '@/components/history';
-import WorkflowList from '@/components/workflow_list';
-import NewWorkflow from '@/components/new_workflow';
+import History from '@/components/admin/history';
+import WorkflowList from '@/components/admin/workflow_list';
+import NewWorkflow from '@/components/admin/new_workflow';
 
 const Admin = () => {
   return (

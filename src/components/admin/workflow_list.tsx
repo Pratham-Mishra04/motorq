@@ -2,7 +2,7 @@ import getHandler from '@/handlers/getHandler';
 import { Workflow } from '@/types';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import WorkflowComponent from './workflow';
+import WorkflowComponent from '../workflow';
 
 const WorkflowList = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
