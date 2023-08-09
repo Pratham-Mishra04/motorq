@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import getHandler from '@/handlers/getHandler';
 import postHandler from '@/handlers/postHandler';
 import WorkflowComponent from '@/components/workflow';
+import History from '@/components/history';
 
 const Admin = () => {
   const [workflow, setWorkflow] = useState<Workflow>(initialWorkflow);
@@ -138,6 +139,7 @@ const Admin = () => {
           return <WorkflowComponent key={workflow.id} workflow={workflow} />;
         })}
       </div>
+      <History />
     </div>
   );
 };
