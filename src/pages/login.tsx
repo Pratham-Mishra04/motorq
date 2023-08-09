@@ -1,4 +1,6 @@
 import configuredAxios from '@/config/axios';
+import postHandler from '@/handlers/postHandler';
+import { AxiosError } from 'axios';
 import { setCookies } from 'cookies-next';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
@@ -15,18 +17,15 @@ export default function ExampleV3(): JSX.Element {
       email,
       password,
     };
-    try {
-      const res = await configuredAxios.post('/auth/login', formData);
-      if (res.status == 201) {
-        setCookies('token', res.data.token);
-        setCookies('role', res.data.role);
-        router.push('/');
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error('Internal Server Error');
+
+    const res = await postHandler('/auth/login', formData);
+    if (res.statusCode == 201) {
+      toast.success('Logged In');
+      setCookies('token', res.data.token);
+      setCookies('role', res.data.role);
+      router.push('/');
+    } else {
+      toast.error(res.data.message);
     }
   };
 

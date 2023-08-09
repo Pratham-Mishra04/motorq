@@ -1,6 +1,7 @@
-import configuredAxios from '@/config/axios';
-import { Workflow, Approver, Request } from '@/types';
-import { initialRequest, initialWorkflow } from '@/types/initials';
+import getHandler from '@/handlers/getHandler';
+import postHandler from '@/handlers/postHandler';
+import { Workflow, Request } from '@/types';
+import { initialRequest } from '@/types/initials';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -8,17 +9,30 @@ const Requester = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [request, setRequest] = useState<Request>(initialRequest);
 
+  const [userRequests, setUserRequests] = useState<Request[]>([]);
+
   useEffect(() => {
-    configuredAxios
-      .get('/requester/get-workflows')
+    getHandler('/requester/get-workflows')
       .then((res) => {
-        if (res.status == 200) setWorkflows(res.data.approvers || []);
-        else toast.error(res.data.workflows);
+        if (res.statusCode == 200) setWorkflows(res.data || []);
+        else toast.error(res.data.message);
       })
       .catch((err) => {
         toast.error('Internal Server Error');
       });
   }, []);
+
+  // useEffect(() => {
+  //   configuredAxios
+  //     .get('/requester/get-requests')
+  //     .then((res) => {
+  //       if (res.status == 200) setUserRequests(res.data.requests || []);
+  //       else toast.error(res.data.message);
+  //     })
+  //     .catch((err) => {
+  //       toast.error('Internal Server Error');
+  //     });
+  // }, []);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -43,16 +57,12 @@ const Requester = () => {
       description: request.description,
       workflowId: request.workflowId,
     };
-    try {
-      const res = await configuredAxios.post('/requester/create-request ', formData);
-      if (res.status == 201) {
-        toast.success('Request Added.');
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error('Internal Server Error');
+
+    const res = await postHandler('/requester/create-request ', formData);
+    if (res.statusCode == 201) {
+      toast.success('Request Added.');
+    } else {
+      toast.error(res.data.message);
     }
   };
 
@@ -67,8 +77,8 @@ const Requester = () => {
             </label>
             <input
               type="text"
-              id="id"
-              name="id"
+              id="name"
+              name="name"
               value={request.name}
               onChange={handleInputChange}
               className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
@@ -101,9 +111,11 @@ const Requester = () => {
                       workflowId: workflow.id,
                     }))
                   }
-                  className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2"
+                  className={`w-full cursor-pointer ${
+                    request.workflowId == workflow.id ? 'bg-slate-300' : ''
+                  } flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2`}
                 >
-                  <div>{workflow.name}</div>
+                  <div className="text-xl">{workflow.name}</div>
                   <div>{workflow.description}</div>
                 </div>
               );
@@ -116,6 +128,17 @@ const Requester = () => {
             Submit
           </button>
         </form>
+        <div className="flex flex-col gap-2">
+          <div className="block text-sm font-medium text-gray-700">List of Requests: </div>
+          {userRequests.map((request) => {
+            return (
+              <div key={request.id} className="w-full flex flex-col gap-1 hover:bg-slate-300 rounded-xl text-center py-2">
+                <div>{request.name}</div>
+                <div>{request.description}</div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

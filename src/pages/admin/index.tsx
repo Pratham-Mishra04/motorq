@@ -3,6 +3,8 @@ import { Approver, Workflow } from '@/types';
 import { initialWorkflow } from '@/types/initials';
 import configuredAxios from '@/config/axios';
 import { toast } from 'react-toastify';
+import getHandler from '@/handlers/getHandler';
+import postHandler from '@/handlers/postHandler';
 
 const Admin = () => {
   const [workflow, setWorkflow] = useState<Workflow>(initialWorkflow);
@@ -10,11 +12,12 @@ const Admin = () => {
   const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
 
   useEffect(() => {
-    configuredAxios
-      .get('/admin/get-approvers')
+    getHandler('/admin/get-approvers')
       .then((res) => {
-        if (res.status == 200) setApprovers(res.data.approvers || []);
-        else toast.error(res.data.message);
+        if (res.statusCode == 200) {
+          setApprovers(res.data || []);
+          console.log(res.data);
+        } else toast.error(res.data.message);
       })
       .catch((err) => {
         toast.error('Internal Server Error');
@@ -45,16 +48,13 @@ const Admin = () => {
       type: workflow.type,
       approvers: selectedApprovers,
     };
-    try {
-      const res = await configuredAxios.post('/admin/create-workflow', formData);
-      if (res.status == 201) {
-        toast.success('Workflow Added.');
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error('Internal Server Error');
+
+    const res = await postHandler('/admin/create-workflow', formData);
+    if (res.statusCode == 201) {
+      toast.success('Workflow Added.');
+      setWorkflow(initialWorkflow);
+    } else {
+      toast.error(res.data.message);
     }
   };
 
@@ -69,8 +69,8 @@ const Admin = () => {
             </label>
             <input
               type="text"
-              id="id"
-              name="id"
+              id="name"
+              name="name"
               value={workflow.name}
               onChange={handleInputChange}
               className="w-full bg-slate-200 text-black p-3 rounded-lg font-Inconsolata text-xl transition-all duration-200 ease-in-out focus:bg-[#1f1f1f] focus:text-white focus:outline-none"
@@ -98,10 +98,12 @@ const Admin = () => {
                 <div
                   key={approver.id}
                   onClick={() => {
-                    if (selectedApprovers.includes(approver.userId)) return;
-                    setSelectedApprovers((prev) => [...prev, approver.userId]);
+                    if (selectedApprovers.includes(approver.id)) return;
+                    setSelectedApprovers((prev) => [...prev, approver.id]);
                   }}
-                  className={`w-full ${selectedApprovers.includes(approver.userId) ? '' : 'hover:bg-slate-300'} rounded-xl text-center py-2`}
+                  className={`w-full ${
+                    selectedApprovers.includes(approver.id) ? 'bg-slate-300' : 'hover:bg-slate-300'
+                  } cursor-pointer rounded-xl text-center py-2`}
                 >
                   {approver.User.name}
                 </div>
