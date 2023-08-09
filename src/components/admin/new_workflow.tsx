@@ -1,6 +1,6 @@
 import getHandler from '@/handlers/getHandler';
 import postHandler from '@/handlers/postHandler';
-import { Workflow, Approver } from '@/types';
+import { Workflow, Approver, Type } from '@/types';
 import { initialWorkflow } from '@/types/initials';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -91,6 +91,21 @@ const NewWorkflow = () => {
             required
           />
         </div>
+        <label htmlFor="countries" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          Select an option
+        </label>
+        <select
+          id="type"
+          name="type"
+          value={workflow.type}
+          onChange={handleInputChange}
+          className="bg-slate-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >
+          <option selected>Choose type</option>
+          <option value={Type.ALL}>{Type.ALL}</option>
+          <option value={Type.SINGLE}>{Type.SINGLE}</option>
+          <option value={Type.TWO}>{Type.TWO}</option>
+        </select>
         <div className="flex flex-col gap-2">
           <div className="block text-sm font-medium text-gray-700">Select Approvers: </div>
           {approvers.map((approver) => {
